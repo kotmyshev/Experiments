@@ -8,23 +8,32 @@
 #include <tuple>
 #include <vector>
 #include <fstream>
+#include <unordered_map>
+#include "log_duration.h"
 
 using namespace std;
 
 vector<pair<string, int>> GetSortedWordCounts(vector<string> words) {
-    map<string, int> counts_map;
+    unordered_map<string, int> counts_map;
 
+    {
+        LOG_DURATION("Filling"s);
 
-    for (auto& word : words) {
-        ++counts_map[move(word)];
+        for (auto& word : words) {
+            ++counts_map[move(word)];
+        }
     }
 
-    vector<pair<string, int>> counts_vector(move_iterator(counts_map.begin()), move_iterator(counts_map.end()));
-    sort(counts_vector.begin(), counts_vector.end(), [](const auto& l, const auto& r) {
-        return l.second > r.second;
-    });
+    {
+        LOG_DURATION("Moving & sorting"s);
 
-    return counts_vector;
+        vector<pair<string, int>> counts_vector(move_iterator(counts_map.begin()), move_iterator(counts_map.end()));
+        sort(counts_vector.begin(), counts_vector.end(), [](const auto& l, const auto& r) {
+            return l.second > r.second;
+        });
+
+        return counts_vector;
+    }
 }
 
 int main() {
@@ -34,7 +43,7 @@ int main() {
     ifstream fin("canterbury.txt");
 
     while (fin >> word) {
-        if (word.size()>5){
+        if (word.size()>0){
         words.push_back(word);}
     }
 
